@@ -5,6 +5,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -14,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.henrikherzig.playintegritychecker.R
+import com.henrikherzig.playintegritychecker.background.WorkManagerScheduler
 import com.henrikherzig.playintegritychecker.dataStore
 import com.henrikherzig.playintegritychecker.ui.*
 
@@ -52,7 +55,16 @@ fun Settings(playServiceVersion: String?) {
     LaunchedEffect(viewModel) {
         viewModel.requestTheme()
         viewModel.requestURL()
+        viewModel.requestWidgetSettings()
     }
+
+    // Widget settings states
+    val widgetRefreshEnabled = viewModel.stateWidgetRefreshEnabled.observeAsState(true).value
+    val checkIntervalMinutes = viewModel.stateCheckIntervalMinutes.observeAsState(60).value
+    val alertsEnabled = viewModel.stateAlertsEnabled.observeAsState(true).value
+
+    // Interval options
+    val intervalOptions = WorkManagerScheduler.getAvailableIntervals()
 
     // get url variable for textField
     val urlValue = viewModel.stateURL.observeAsState().value
@@ -150,6 +162,90 @@ fun Settings(playServiceVersion: String?) {
                         //.padding(8.dp)
                         .height(35.dp),
                     placeholder = { Text(stringResource(R.string.settings_url_hint)) }
+                )
+            }
+
+            // Widget & Background Monitoring Settings
+            Spacer(Modifier.size(20.dp))
+            CustomCardTitle(stringResource(R.string.settings_widget_title))
+
+            // Widget auto-refresh toggle
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(fraction = 0.7f)
+                ) {
+                    Text(stringResource(R.string.settings_widget_refresh))
+                }
+                Switch(
+                    checked = widgetRefreshEnabled,
+                    onCheckedChange = { enabled ->
+                        viewModel.setWidgetRefreshEnabled(enabled)
+                        if (enabled) {
+                            WorkManagerScheduler.schedulePeriodicCheck(context, checkIntervalMinutes)
+                        } else {
+                            WorkManagerScheduler.cancelPeriodicCheck(context)
+                        }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.size(12.dp))
+
+            // Check interval selector
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(fraction = 0.3f)
+                ) {
+                    Text(stringResource(R.string.settings_check_interval))
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    val intervalSelectorOptions: List<List<String>> = intervalOptions.map {
+                        listOf(it.minutes.toString(), it.label)
+                    }
+                    val currentIntervalMode = checkIntervalMinutes.toString()
+
+                    ToggleGroup(
+                        currentIntervalMode,
+                        intervalSelectorOptions,
+                        indexChanged = { newMinutes ->
+                            val minutes = newMinutes.toIntOrNull() ?: 60
+                            viewModel.setCheckIntervalMinutes(minutes)
+                            if (widgetRefreshEnabled) {
+                                WorkManagerScheduler.schedulePeriodicCheck(context, minutes)
+                            }
+                        },
+                        height = 35.dp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.size(12.dp))
+
+            // Alerts toggle
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(fraction = 0.7f)
+                ) {
+                    Text(stringResource(R.string.settings_alerts_enabled))
+                }
+                Switch(
+                    checked = alertsEnabled,
+                    onCheckedChange = { enabled ->
+                        viewModel.setAlertsEnabled(enabled)
+                    }
                 )
             }
         }

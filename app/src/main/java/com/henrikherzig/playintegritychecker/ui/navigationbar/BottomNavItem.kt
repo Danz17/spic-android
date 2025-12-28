@@ -11,6 +11,7 @@ import com.henrikherzig.playintegritychecker.R
 
 sealed class BottomNavItem(@StringRes var title:Int, var icon: ImageVector, var screen_route:String){
 
+    object Dashboard : BottomNavItem(R.string.bottomBar_dashboard, Icons.Filled.Home, "dashboard")
     object PlayIntegrity : BottomNavItem(R.string.bottomBar_playIntegrity, Icons.Filled.VerifiedUser ,"play_integrity")
     object SafetyNet: BottomNavItem(R.string.bottomBar_safetyNet,Icons.Filled.VerifiedUser,"safety_net")
     object Settings: BottomNavItem(R.string.bottomBar_settings, Icons.Filled.Settings,"settings")

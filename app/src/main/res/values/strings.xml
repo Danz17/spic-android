@@ -99,6 +99,17 @@
     <string name="settings_url">Server URL</string>
     <string name="settings_url_hint">custom server url</string>
 
+    <!-- Widget & Background Monitoring Settings -->
+    <string name="settings_widget_title">Widget &amp; Monitoring</string>
+    <string name="settings_widget_refresh">Background Checks</string>
+    <string name="settings_check_interval">Interval</string>
+    <string name="settings_alerts_enabled">Integrity Alerts</string>
+
+    <!-- Widget Strings -->
+    <string name="widget_small_description">Compact integrity status indicator</string>
+    <string name="widget_medium_description">Detailed integrity status with all verdicts</string>
+    <string name="loading">Loading...</string>
+
 
     <!-- About Strings -->
     <string name="about_this_app">This app is an open source implementation of the Google Play Integrity API as well as the Safety Net Attestation API (API info see below). The unique nonce creation as well as the checks of the verdict returned by both APIs can be performed locally on the device or on a remote server using the server implementation.</string>
@@ -121,8 +132,23 @@
     <string name="about_privacyLink" translatable="false">https://github.com/herzhenr/spic-android/blob/main/privacyPolicy.md</string>
 
     <!-- BottomNavigationBar -->
-    <string name="bottomBar_playIntegrity">Play Integ.</string>
+    <string name="bottomBar_dashboard">Home</string>
+    <string name="bottomBar_playIntegrity">Integrity</string>
     <string name="bottomBar_safetyNet">SafetyNet</string>
     <string name="bottomBar_settings">Settings</string>
     <string name="bottomBar_about">About</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Device Integrity Status</string>
+    <string name="dashboard_lastCheck">Last checked</string>
+    <string name="dashboard_checkNow">Check Now</string>
+    <string name="dashboard_neverChecked">Never checked</string>
+    <string name="dashboard_deviceIntegrity">Device Integrity</string>
+    <string name="dashboard_basicIntegrity">Basic Integrity</string>
+    <string name="dashboard_strongIntegrity">Strong Integrity</string>
+    <string name="dashboard_appRecognized">App Recognized</string>
+    <string name="dashboard_licensed">Licensed</string>
+    <string name="dashboard_unknown">Unknown</string>
+    <string name="dashboard_error">Error</string>
+    <string name="dashboard_tapToCheck">Tap to run integrity check</string>
 </resources>

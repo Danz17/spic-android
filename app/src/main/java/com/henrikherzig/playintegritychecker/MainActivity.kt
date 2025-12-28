@@ -10,6 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.common.GoogleApiAvailability
 import com.henrikherzig.playintegritychecker.attestation.playintegrity.AttestationCallPlayIntegrity
 import com.henrikherzig.playintegritychecker.attestation.safetynet.AttestationCallSafetyNet
+import com.henrikherzig.playintegritychecker.notifications.IntegrityNotificationManager
 import com.henrikherzig.playintegritychecker.ui.navigationbar.BottomNavigationBar
 import com.henrikherzig.playintegritychecker.ui.theme.PlayIntegrityCheckerTheme
 
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        IntegrityNotificationManager.createNotificationChannel(this)
         setContent {
             PlayIntegrityCheckerTheme() {
                 // function to be called when safetyNetRequest is made

@@ -6,9 +6,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -62,22 +62,22 @@ fun ResultContent(state: State<ResponseType<Statement>>, onClose: () -> Unit) {
 @Composable
 fun Success(text: String) {
     val localClipboardManager = LocalClipboardManager.current
-    Row(verticalAlignment = Alignment.CenterVertically/*, modifier = Modifier.padding(12.dp)*/) {
-        Text(text = text)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
     TextButton(
-        onClick = {
-            localClipboardManager.setText(AnnotatedString(text))
-        },
-        //shape = MaterialTheme.shapes.medium,
-        shape = RoundedCornerShape(10.dp)
+        onClick = { localClipboardManager.setText(AnnotatedString(text)) },
+        shape = RoundedCornerShape(12.dp)
     ) {
         Icon(
             Icons.Outlined.ContentCopy,
             contentDescription = null,
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(18.dp)
         )
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Spacer(Modifier.width(8.dp))
         Text(text = stringResource(id = android.R.string.copy))
     }
 }
@@ -89,19 +89,19 @@ fun Success(text: String) {
  * **/
 @Composable
 fun Error(e: Throwable, onClick: () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically/*, modifier = Modifier.padding(12.dp)*/) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             Icons.Outlined.Error,
             contentDescription = null,
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.error
         )
-        Spacer(Modifier.size(10.dp))
-        //e.message?.let { Text(text = it) }
-        Text(text = ((if (e.message == null) stringResource(R.string.result_UnknownError) else e.message.toString())))
-        Spacer(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = e.message ?: stringResource(R.string.result_UnknownError),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.weight(1f)
         )
         CustomCloseButton(onClick = onClick)
     }
@@ -113,10 +113,17 @@ fun Error(e: Throwable, onClick: () -> Unit) {
  */
 @Composable
 fun Loading() {
-    Row(verticalAlignment = Alignment.CenterVertically/*, modifier = Modifier.padding(12.dp)*/) {
-        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.size(10.dp))
-        Text(text = stringResource(R.string.result_loading))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(
+            strokeWidth = 2.dp,
+            modifier = Modifier.size(20.dp),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = stringResource(R.string.result_loading),
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
@@ -137,7 +144,7 @@ fun PlayIntegrityResult(attest: PlayIntegrityStatement) {
     val recognitionVerdict = attest.deviceIntegrity?.deviceRecognitionVerdict
     var state = 0
     var text = "NO_INTEGRITY"
-    if (recognitionVerdict?.size!! > 0) {
+    if (recognitionVerdict != null && recognitionVerdict.size > 0) {
         if (recognitionVerdict.contains("MEETS_STRONG_INTEGRITY")) {
             state = 3
             text = "MEETS_STRONG_INTEGRITY"
@@ -323,18 +330,18 @@ fun PlayIntegrityResult(attest: PlayIntegrityStatement) {
     }
 
     // button to show received raw json
+    Spacer(Modifier.height(8.dp))
     val openedJson = remember { mutableStateOf(false) }
     TextButton(
         onClick = { openedJson.value = true },
-        //shape = MaterialTheme.shapes.medium,
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Icon(
             Icons.Outlined.Code,
             contentDescription = null,
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(18.dp)
         )
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Spacer(Modifier.width(8.dp))
         Text(text = stringResource(R.string.result_rawJsonResult))
     }
 
@@ -428,17 +435,18 @@ fun SafetyNetResult(attest: SafetyNetStatement) {
     )
 
     // button to show received raw json
+    Spacer(Modifier.height(8.dp))
     val opened = remember { mutableStateOf(false) }
     TextButton(
         onClick = { opened.value = true },
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Icon(
             Icons.Outlined.Code,
             contentDescription = null,
-            modifier = Modifier.size(ButtonDefaults.IconSize)
+            modifier = Modifier.size(18.dp)
         )
-        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Spacer(Modifier.width(8.dp))
         Text(text = stringResource(R.string.result_rawJsonResult))
     }
 

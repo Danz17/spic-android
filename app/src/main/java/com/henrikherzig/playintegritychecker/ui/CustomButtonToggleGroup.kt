@@ -1,110 +1,84 @@
 package com.henrikherzig.playintegritychecker.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-
 
 /**
- * Custom MaterialButtonToggleGroup
+ * Material 3 Segmented Button Group
  */
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToggleGroup(
-    selectedIndex: String,
-    items: List<List<String>>,
-    indexChanged: (String) -> Unit,
-    height: Dp
+  selectedIndex: String,
+  items: List<List<String>>,
+  indexChanged: (String) -> Unit,
+  height: androidx.compose.ui.unit.Dp = 40.dp
 ) {
-    val cornerRadius = 8.dp
-    Row {
-        items.forEachIndexed { index, item ->
-            CompositionLocalProvider(
-                LocalMinimumTouchTargetEnforcement provides false,
-            ) {
-                OutlinedButton(
-                    contentPadding = PaddingValues(horizontal = 0.dp),
-                    modifier = when (index) {
-                        0 ->
-                            Modifier
-                                .offset(0.dp, 0.dp)
-                                .zIndex(if (selectedIndex == item[0]) 1f else 0f)
-                                .fillMaxWidth().weight(1f)
-                                .height(height)
-                        else ->
-                            Modifier
-                                .offset((-1 * index).dp, 0.dp)
-                                .zIndex(if (selectedIndex == item[0]) 1f else 0f)
-                                .fillMaxWidth().weight(1f)
-                                .height(height)
-                    },
-                    onClick = {
-                        indexChanged(item[0])
-                        //selectedIndex = index
-                    },
-                    shape = when (index) {
-                        // left outer button
-                        0 -> RoundedCornerShape(
-                            topStart = cornerRadius,
-                            topEnd = 0.dp,
-                            bottomStart = cornerRadius,
-                            bottomEnd = 0.dp
-                        )
-                        // right outer button
-                        items.size - 1 -> RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = cornerRadius,
-                            bottomStart = 0.dp,
-                            bottomEnd = cornerRadius
-                        )
-                        // middle button
-                        else -> RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = 0.dp,
-                            bottomStart = 0.dp,
-                            bottomEnd = 0.dp
-                        )
-                    },
-                    border = BorderStroke(
-                        1.dp, if (selectedIndex == item[0]) {
-                            MaterialTheme.colors.primary
-                        } else {
-                            Color.DarkGray.copy(alpha = 0.75f)
-                        }
-                    ),
-                    colors = if (selectedIndex == item[0]) {
-                        // selected colors
-                        ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = MaterialTheme.colors.primary.copy(
-                                alpha = 0.1f
-                            ), contentColor = MaterialTheme.colors.primary
-                        )
-                    } else {
-                        // not selected colors
-                        ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = MaterialTheme.colors.surface,
-                            contentColor = MaterialTheme.colors.primary
-                        )
-                    },
-                ) {
-                    Text(
-                        text = item[1],
-                        color = if (selectedIndex == items[index][0]) {
-                            MaterialTheme.colors.primary
-                        } else {
-                            Color.DarkGray.copy(alpha = 0.9f)
-                        },
-                    )
-                }
-            }
-        }
+  SingleChoiceSegmentedButtonRow(
+    modifier = Modifier.fillMaxWidth()
+  ) {
+    items.forEachIndexed { index, item ->
+      SegmentedButton(
+        selected = selectedIndex == item[0],
+        onClick = { indexChanged(item[0]) },
+        shape = SegmentedButtonDefaults.itemShape(
+          index = index,
+          count = items.size
+        ),
+        colors = SegmentedButtonDefaults.colors(
+          activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+          activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          inactiveContainerColor = MaterialTheme.colorScheme.surface,
+          inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+      ) {
+        Text(
+          text = item[1],
+          style = MaterialTheme.typography.labelMedium
+        )
+      }
     }
+  }
+}
+
+/**
+ * Multi-select toggle group (for future use)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MultiToggleGroup(
+  selectedItems: Set<String>,
+  items: List<List<String>>,
+  onSelectionChange: (Set<String>) -> Unit
+) {
+  MultiChoiceSegmentedButtonRow(
+    modifier = Modifier.fillMaxWidth()
+  ) {
+    items.forEachIndexed { index, item ->
+      SegmentedButton(
+        checked = selectedItems.contains(item[0]),
+        onCheckedChange = { checked ->
+          val newSelection = if (checked) {
+            selectedItems + item[0]
+          } else {
+            selectedItems - item[0]
+          }
+          onSelectionChange(newSelection)
+        },
+        shape = SegmentedButtonDefaults.itemShape(
+          index = index,
+          count = items.size
+        )
+      ) {
+        Text(
+          text = item[1],
+          style = MaterialTheme.typography.labelMedium
+        )
+      }
+    }
+  }
 }
