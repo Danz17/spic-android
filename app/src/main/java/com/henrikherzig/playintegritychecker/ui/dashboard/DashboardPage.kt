@@ -17,21 +17,45 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.henrikherzig.playintegritychecker.R
+import com.henrikherzig.playintegritychecker.attestation.PlayIntegrityStatement
 import com.henrikherzig.playintegritychecker.ui.CustomButton
 import com.henrikherzig.playintegritychecker.ui.CustomElevatedCard
+import com.henrikherzig.playintegritychecker.ui.ResponseType
 import com.henrikherzig.playintegritychecker.ui.theme.IntegrityColors
 import com.henrikherzig.playintegritychecker.widget.WidgetStateManager
 import com.henrikherzig.playintegritychecker.widget.WidgetStateManager.OverallStatus
+import kotlinx.coroutines.launch
 
 @Composable
 fun Dashboard(
+  playIntegrityResult: State<ResponseType<PlayIntegrityStatement>>,
   onCheckNow: () -> Unit
 ) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
+  val scope = rememberCoroutineScope()
 
   val integrityState by WidgetStateManager.getIntegrityStateFlow(context)
     .collectAsState(initial = WidgetStateManager.IntegrityState())
+
+  // Update state when we get a successful result
+  LaunchedEffect(playIntegrityResult.value) {
+    when (val result = playIntegrityResult.value) {
+      is ResponseType.SuccessPlayIntegrity -> {
+        val attest = result.value
+        val deviceVerdict = attest.deviceIntegrity?.deviceRecognitionVerdict ?: emptyList()
+        val appVerdict = attest.appIntegrity?.appRecognitionVerdict
+        val licensingVerdict = attest.accountDetails?.appLicensingVerdict
+        WidgetStateManager.saveIntegrityResult(context, deviceVerdict, appVerdict, licensingVerdict)
+      }
+      is ResponseType.Failure -> {
+        WidgetStateManager.saveIntegrityError(context, result.error.message ?: "Unknown error")
+      }
+      else -> {}
+    }
+  }
+
+  val isLoading = playIntegrityResult.value is ResponseType.Loading
 
   Column(
     modifier = Modifier
@@ -51,11 +75,33 @@ fun Dashboard(
     }
 
     // Check Now Button
-    CustomButton(
-      onClick = onCheckNow,
-      icon = Icons.Outlined.Refresh,
-      text = stringResource(R.string.dashboard_checkNow)
-    )
+    if (isLoading) {
+      FilledTonalButton(
+        onClick = { },
+        enabled = false,
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(48.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+      ) {
+        CircularProgressIndicator(
+          modifier = Modifier.size(20.dp),
+          strokeWidth = 2.dp,
+          color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+          text = stringResource(R.string.result_loading),
+          style = MaterialTheme.typography.labelLarge
+        )
+      }
+    } else {
+      CustomButton(
+        onClick = onCheckNow,
+        icon = Icons.Outlined.Refresh,
+        text = stringResource(R.string.dashboard_checkNow)
+      )
+    }
 
     // Last check time
     if (integrityState.lastCheckTimestamp > 0) {

@@ -155,8 +155,13 @@ class AttestationCallPlayIntegrity : ViewModel() {
         when (verifyType) {
             "local" -> {
                 // decrypt verdict locally and update UI
-                val decoded: PlayIntegrityStatement = decodeLocally(integrityToken)
-                playIntegrityResult.value = ResponseType.SuccessPlayIntegrity(decoded)
+                try {
+                    val decoded: PlayIntegrityStatement = decodeLocally(integrityToken)
+                    playIntegrityResult.value = ResponseType.SuccessPlayIntegrity(decoded)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    playIntegrityResult.value = ResponseType.Failure(e)
+                }
             }
             "google", "server" -> {
                 // Create executor for async execution of API call
@@ -196,27 +201,39 @@ class AttestationCallPlayIntegrity : ViewModel() {
      **/
     private fun decodeLocally(integrityToken: String): PlayIntegrityStatement {
         val base64OfEncodedDecryptionKey = BuildConfig.base64_of_encoded_decryption_key
+        val base64OfEncodedVerificationKey = BuildConfig.base64_of_encoded_verification_key
 
-        // base64OfEncodedDecryptionKey is provided through Play Console.
-        val decryptionKeyBytes: ByteArray =
-            Base64.decode(base64OfEncodedDecryptionKey, Base64.DEFAULT)
+        // Validate keys are configured
+        if (base64OfEncodedDecryptionKey.isNullOrEmpty() || base64OfEncodedVerificationKey.isNullOrEmpty()) {
+            throw AttestationException("Local verification keys not configured. Add keys to local.properties or use 'server' mode.")
+        }
 
-        // Deserialized encryption (symmetric) key.
-        val decryptionKey: SecretKey = SecretKeySpec(
-            decryptionKeyBytes,
-            /* offset= */ 0,
-            decryptionKeyBytes.size,
-            "AES"
-        )
+        val decryptionKeyBytes: ByteArray
+        val encodedVerificationKey: ByteArray
+        val decryptionKey: SecretKey
+        val verificationKey: PublicKey
 
-        val base64OfEncodedVerificationKey =BuildConfig.base64_of_encoded_verification_key
-        // base64OfEncodedVerificationKey is provided through Play Console.
-        val encodedVerificationKey: ByteArray =
-            Base64.decode(base64OfEncodedVerificationKey, Base64.DEFAULT)
+        try {
+            // base64OfEncodedDecryptionKey is provided through Play Console.
+            decryptionKeyBytes = Base64.decode(base64OfEncodedDecryptionKey, Base64.DEFAULT)
 
-        // Deserialized verification (public) key.
-        val verificationKey: PublicKey = KeyFactory.getInstance("EC")
-            .generatePublic(X509EncodedKeySpec(encodedVerificationKey))
+            // Deserialized encryption (symmetric) key.
+            decryptionKey = SecretKeySpec(
+                decryptionKeyBytes,
+                /* offset= */ 0,
+                decryptionKeyBytes.size,
+                "AES"
+            )
+
+            // base64OfEncodedVerificationKey is provided through Play Console.
+            encodedVerificationKey = Base64.decode(base64OfEncodedVerificationKey, Base64.DEFAULT)
+
+            // Deserialized verification (public) key.
+            verificationKey = KeyFactory.getInstance("EC")
+                .generatePublic(X509EncodedKeySpec(encodedVerificationKey))
+        } catch (e: Exception) {
+            throw AttestationException("Invalid verification keys. Check local.properties configuration. Error: ${e.message}")
+        }
 
 
         val jwe: JsonWebEncryption =

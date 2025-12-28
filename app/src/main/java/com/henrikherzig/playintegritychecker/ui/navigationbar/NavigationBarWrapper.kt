@@ -171,13 +171,13 @@ fun BottomNavigationBar(
     ) {
       composable(BottomNavItem.Dashboard.screen_route) {
         Dashboard(
+          playIntegrityResult = playIntegrityResult,
           onCheckNow = {
-            navController.navigate(BottomNavItem.PlayIntegrity.screen_route) {
-              popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-              }
-              launchSingleTop = true
-            }
+            onPlayIntegrityRequest(
+              selectedIndexCheckPlayIntegrity,
+              selectedIndexNoncePlayIntegrity,
+              urlValue
+            )
           }
         )
       }
