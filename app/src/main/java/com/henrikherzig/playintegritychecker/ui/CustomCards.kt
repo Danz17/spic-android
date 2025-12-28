@@ -68,10 +68,10 @@ fun RequestSettings(
  */
 @Composable
 fun DeviceInfoContent(playServiceVersion: String?) {
-    CustomCard {
+    CustomElevatedCard {
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
                 .fillMaxWidth(),
         ) {
             CustomCardTitle(text = stringResource(R.string.info_device))

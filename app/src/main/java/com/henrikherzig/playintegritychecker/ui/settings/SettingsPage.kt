@@ -5,9 +5,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -87,7 +87,7 @@ fun Settings(playServiceVersion: String?) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .clickable( // no animation when clicked to lose focus of url textField
+            .clickable(
                 interactionSource = interactionSource,
                 indication = null
             ) { hideKeyboard = true }
@@ -95,125 +95,122 @@ fun Settings(playServiceVersion: String?) {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .padding(all = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
+            // Device Info Section
             DeviceInfoContent(playServiceVersion)
-            Spacer(Modifier.size(12.dp))
-            CustomCardTitle(stringResource(R.string.settings_title))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-//                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                //horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                /* workaround: .weight is not accessible in button directly and also not if box
-                   is extracted to other method, have to investigate this */
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = 0.3f)
-                    //.weight(0.3f)
-                    //.absolutePadding(right = 12.dp)
-                ) {
-                    Text(stringResource(R.string.settings_theme))
-                }
-                Box(
+
+            Spacer(Modifier.height(20.dp))
+
+            // App Settings Section
+            CustomElevatedCard {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                    //.absolutePadding(left = 12.dp)
+                        .padding(16.dp)
                 ) {
-                    ToggleGroup(themeSelectorMode, themeSelectorOptions, modeChanged, 35.dp)
-                }
-            }
-            Spacer(modifier = Modifier.size(12.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-//                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                //horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                /* workaround: .weight is not accessible in button directly and also not if box
-                   is extracted to other method, have to investigate this */
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = 0.3f)
-                    //.weight(0.3f)
-                    //.absolutePadding(right = 12.dp)
-                ) {
-                    Text(stringResource(R.string.settings_url))
-                }
-                CustomTextField(
-                    value = text,
-                    onValueChange = {
-                        text = it
-                    },
-                    hideKeyboard = hideKeyboard,
-                    onFocusClear = {
-                        viewModel.setURL(text)
-                        hideKeyboard = false
-                    },
-                    onSearch = {
-                        viewModel.setURL(text)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        //.padding(8.dp)
-                        .height(35.dp),
-                    placeholder = { Text(stringResource(R.string.settings_url_hint)) }
-                )
-            }
+                    Text(
+                        text = stringResource(R.string.settings_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-            // Widget & Background Monitoring Settings
-            Spacer(Modifier.size(20.dp))
-            CustomCardTitle(stringResource(R.string.settings_widget_title))
+                    Spacer(Modifier.height(16.dp))
 
-            // Widget auto-refresh toggle
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(fraction = 0.7f)
-                ) {
-                    Text(stringResource(R.string.settings_widget_refresh))
-                }
-                Switch(
-                    checked = widgetRefreshEnabled,
-                    onCheckedChange = { enabled ->
-                        viewModel.setWidgetRefreshEnabled(enabled)
-                        if (enabled) {
-                            WorkManagerScheduler.schedulePeriodicCheck(context, checkIntervalMinutes)
-                        } else {
-                            WorkManagerScheduler.cancelPeriodicCheck(context)
+                    // Theme selector
+                    Text(
+                        text = stringResource(R.string.settings_theme),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    ToggleGroup(themeSelectorMode, themeSelectorOptions, modeChanged, 40.dp)
+
+                    Spacer(Modifier.height(20.dp))
+
+                    // Server URL
+                    Text(
+                        text = stringResource(R.string.settings_url),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    CustomTextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        hideKeyboard = hideKeyboard,
+                        onFocusClear = {
+                            viewModel.setURL(text)
+                            hideKeyboard = false
+                        },
+                        onSearch = { viewModel.setURL(text) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        placeholder = {
+                            Text(
+                                stringResource(R.string.settings_url_hint),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                    }
-                )
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.size(12.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // Check interval selector
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(fraction = 0.3f)
-                ) {
-                    Text(stringResource(R.string.settings_check_interval))
-                }
-                Box(
+            // Widget & Monitoring Section
+            CustomElevatedCard {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .padding(16.dp)
                 ) {
+                    Text(
+                        text = stringResource(R.string.settings_widget_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Background checks toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_widget_refresh),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Switch(
+                            checked = widgetRefreshEnabled,
+                            onCheckedChange = { enabled ->
+                                viewModel.setWidgetRefreshEnabled(enabled)
+                                if (enabled) {
+                                    WorkManagerScheduler.schedulePeriodicCheck(context, checkIntervalMinutes)
+                                } else {
+                                    WorkManagerScheduler.cancelPeriodicCheck(context)
+                                }
+                            }
+                        )
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Check interval
+                    Text(
+                        text = stringResource(R.string.settings_check_interval),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(8.dp))
                     val intervalSelectorOptions: List<List<String>> = intervalOptions.map {
                         listOf(it.minutes.toString(), it.label)
                     }
                     val currentIntervalMode = checkIntervalMinutes.toString()
-
                     ToggleGroup(
                         currentIntervalMode,
                         intervalSelectorOptions,
@@ -224,30 +221,33 @@ fun Settings(playServiceVersion: String?) {
                                 WorkManagerScheduler.schedulePeriodicCheck(context, minutes)
                             }
                         },
-                        height = 35.dp
+                        height = 40.dp
                     )
-                }
-            }
 
-            Spacer(modifier = Modifier.size(12.dp))
+                    Spacer(Modifier.height(16.dp))
 
-            // Alerts toggle
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(fraction = 0.7f)
-                ) {
-                    Text(stringResource(R.string.settings_alerts_enabled))
-                }
-                Switch(
-                    checked = alertsEnabled,
-                    onCheckedChange = { enabled ->
-                        viewModel.setAlertsEnabled(enabled)
+                    // Alerts toggle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.settings_alerts_enabled),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Switch(
+                            checked = alertsEnabled,
+                            onCheckedChange = { enabled ->
+                                viewModel.setAlertsEnabled(enabled)
+                            }
+                        )
                     }
-                )
+                }
             }
+
+            Spacer(Modifier.height(80.dp))
         }
     }
 }
