@@ -50,11 +50,11 @@ object WidgetStateManager {
 
     val overallStatus: OverallStatus
       get() = when {
-        !isSuccess -> OverallStatus.ERROR
+        lastCheckTimestamp == 0L -> OverallStatus.UNKNOWN
+        !isSuccess && !errorMessage.isNullOrEmpty() -> OverallStatus.ERROR
         hasStrongIntegrity -> OverallStatus.STRONG
         hasDeviceIntegrity -> OverallStatus.DEVICE
         hasBasicIntegrity -> OverallStatus.BASIC
-        deviceVerdict.isEmpty() && lastCheckTimestamp == 0L -> OverallStatus.UNKNOWN
         else -> OverallStatus.FAILED
       }
   }

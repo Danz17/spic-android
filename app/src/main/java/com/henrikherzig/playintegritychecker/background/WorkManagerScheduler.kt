@@ -24,10 +24,10 @@ object WorkManagerScheduler {
    * Available check intervals in minutes
    */
   enum class CheckInterval(val minutes: Int, val label: String) {
-    FIFTEEN_MIN(15, "15 minutes"),
-    THIRTY_MIN(30, "30 minutes"),
-    ONE_HOUR(60, "1 hour"),
-    SIX_HOURS(360, "6 hours")
+    FIFTEEN_MIN(15, "15m"),
+    THIRTY_MIN(30, "30m"),
+    ONE_HOUR(60, "1h"),
+    SIX_HOURS(360, "6h")
   }
 
   /**
