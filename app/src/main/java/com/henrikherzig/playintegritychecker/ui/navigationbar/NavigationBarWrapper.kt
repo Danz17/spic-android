@@ -51,14 +51,15 @@ fun BottomNavigationBar(
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
 
-  // State for check and nonce settings
-  var selectedIndexCheckPlayIntegrity by remember { mutableStateOf("local") }
-  var selectedIndexCheckSafetyNet by remember { mutableStateOf("local") }
+  // State for check and nonce settings - default to "raw" which works without keys
+  var selectedIndexCheckPlayIntegrity by remember { mutableStateOf("raw") }
+  var selectedIndexCheckSafetyNet by remember { mutableStateOf("raw") }
 
+  val raw: String = stringResource(id = R.string.requestSettings_raw)
   val local: String = stringResource(id = R.string.requestSettings_local)
   val server: String = stringResource(id = R.string.requestSettings_server)
   val google: String = stringResource(id = R.string.requestSettings_google)
-  val itemsCheck: List<List<String>> = listOf(listOf("local", local), listOf("server", server))
+  val itemsCheck: List<List<String>> = listOf(listOf("raw", raw), listOf("local", local), listOf("server", server))
 
   val changedCheckPlayIntegrity: (idx: String) -> Unit = {
     selectedIndexCheckPlayIntegrity = it

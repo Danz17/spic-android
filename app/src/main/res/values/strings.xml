@@ -76,6 +76,7 @@
     <string name="requestSettings_title">Request Settings</string>
     <string name="requestSettings_nonceCreation">Nonce Creation</string>
     <string name="requestSettings_checkVerdict">Check Verdict</string>
+    <string name="requestSettings_raw">raw</string>
     <string name="requestSettings_local">local</string>
     <string name="requestSettings_server">server</string>
     <string name="requestSettings_google">google</string>

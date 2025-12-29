@@ -153,6 +153,12 @@ class AttestationCallPlayIntegrity : ViewModel() {
         url: String?
     ) {
         when (verifyType) {
+            "raw" -> {
+                // Just show that API call succeeded - token received (no decryption)
+                playIntegrityResult.value = ResponseType.SuccessSimple(
+                    "Play Integrity API call succeeded!\n\nToken received (${integrityToken.length} chars).\n\nTo see full verdict, configure verification keys in local.properties or use server mode."
+                )
+            }
             "local" -> {
                 // decrypt verdict locally and update UI
                 try {
